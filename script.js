@@ -1,29 +1,35 @@
-const display = document.querySelector(".display");
-const buttons = document.querySelectorAll("button");
-const specialChars = ["%", "*", "/", "-", "+", "="];
-let output = "";
+const wrapper = document.querySelector(".wrapper"),
+qrInput = wrapper.querySelector(".form input"),
+generateBtn = wrapper.querySelector(".form button"),
+qrImg = wrapper.querySelector(".qr-code img");
+let preValue;
 
-//Define function to calculate based on button clicked.
-const calculate = (btnValue) => {
-  display.focus();
-  if (btnValue === "=" && output !== "") {
-    //If output has '%', replace with '/100' before evaluating.
-    output = eval(output.replace("%", "/100"));
-  } else if (btnValue === "AC") {
-    output = "";
-  } else if (btnValue === "DEL") {
-    //If DEL button is clicked, remove the last character from the output.
-    output = output.toString().slice(0, -1);
-  } else {
-    //If output is empty and button is specialChars then return
-    if (output === "" && specialChars.includes(btnValue)) return;
-    output += btnValue;
-  }
-  display.value = output;
-};
+generateBtn.addEventListener("click", () => {
+    let qrValue = qrInput.value.trim();
+    if(!qrValue || preValue === qrValue) return;
+    preValue = qrValue;
+    generateBtn.innerText = "qr kodunuz oluşturuluyor";
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrValue}`;
+    qrImg.addEventListener("load", () => {
+        wrapper.classList.add("active");
+        generateBtn.innerText = "QR Kod Oluşturuldu";
+        downloadButton.style.display = "block";
+    });
+});
+// Resmi indirme işlemini gerçekleştiren JavaScript kodu
+document.getElementById("downloadButton").addEventListener("click", function() {
+    let imgSrc = document.getElementById("myimage").src;
+    let a = document.createElement("a");
+    a.href = imgSrc;
+    a.download = "indirilen_resim.jpg";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
 
-//Add event listener to buttons, call calculate() on click.
-buttons.forEach((button) => {
-  //Button click listener calls calculate() with dataset value as argument.
-  button.addEventListener("click", (e) => calculate(e.target.dataset.value));
+qrInput.addEventListener("keyup", () => {
+    if(!qrInput.value.trim()) {
+        wrapper.classList.remove("active");
+        preValue = "";
+    }
 });
